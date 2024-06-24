@@ -62,13 +62,13 @@ language = st.selectbox('Select language:', ['English', 'French', 'Hindi','Telug
     
 if st.button('Lookup'):
     translated_definitions = []
-        for meaning in meanings:
-            for definition in meaning['definitions']:
-                translated_definition = translate_text(definition, language)
-                translated_definitions.append(translated_definition)
-        st.write(f"\nTranslated Definitions:")
-        for idx, trans_def in enumerate(translated_definitions, start=1):
-            st.write(f"Definition {idx}: {trans_def}")
+    for meaning in meanings:
+        for definition in meaning['definitions']:
+            translated_definition = translate_text(definition, language)
+            translated_definitions.append(translated_definition)
+    st.write(f"\nTranslated Definitions:")
+    for idx, trans_def in enumerate(translated_definitions, start=1):
+        st.write(f"Definition {idx}: {trans_def}")
 
 if word:
     word_data = get_word_data(word)
