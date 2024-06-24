@@ -7,7 +7,7 @@ def fetch_word_details(word, language='en'):
     url = f'https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}'
    
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url)
         if response.status_code == 200:
             return response.json()
         else:
