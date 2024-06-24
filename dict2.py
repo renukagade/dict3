@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from googletrans import Translator
 
-BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/fr/'
+BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/'
 
 def get_word_data(word):
     url = f"{BASE_URL}{word}"
