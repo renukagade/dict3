@@ -5,8 +5,7 @@ import requests
 def fetch_word_details(word, language='en'):
     
     url = f'https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}'
-    headers = {'User-Agent': 'YourApp/1.0', 'Authorization': f'Token {api_key}'}
-    
+   
     try:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
