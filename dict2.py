@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from googletrans import Translator
 
-BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/'
+BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/fr/'
 
 def get_word_data(word):
     url = f"{BASE_URL}{word}"
@@ -58,7 +58,7 @@ st.title("Enhanced Multilingual Dictionary Bot")
 st.write("Enter a word to get its meaning and more.")
 
 word = st.text_input("Enter a word:")
-language = st.selectbox('Select language:', ['English', 'French', 'Spanish'])
+'''language = st.selectbox('Select language:', ['English', 'French', 'Spanish'])
     
 if st.button('Lookup'):
     if word:
@@ -72,7 +72,7 @@ if st.button('Lookup'):
                     st.header(f"Meaning ({meaning['word']})")
                     for definition in meaning['meanings']:
                         st.markdown(f"- {definition}")
-                    st.markdown("---")
+                    st.markdown("---")'''
                 
 
 if word:
