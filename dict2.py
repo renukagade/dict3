@@ -99,7 +99,7 @@ if word:
                 translated_definition = translate_text(definition, dest_lang)
                 translated_definitions.append(translated_definition)
         st.write(f"\nTranslated Definitions:")
-        for idx, trans_def in enumerate(translated_definitions, start=1):
+        for idx, trans_def in enumerate(translated_definitions, start=1,end=3):
             st.write(f"Definition {idx}: {trans_def}") 
 
     else:
