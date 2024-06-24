@@ -6,7 +6,7 @@ def fetch_word_details(word, language="en"):
     url = f"https://wordsapiv1.p.rapidapi.com/words/{word}"
     headers = {
         'x-rapidapi-host': "wordsapiv1.p.rapidapi.com",
-        'x-rapidapi-key': "e5422b2b2bmsh9d55d4e1d87c885p1c0822jsnd01b8895c9bc"
+        'x-rapidapi-key': "https://api.dictionaryapi.dev/api/v2/entries/en/"
     }
     params = {"language": language}
     response = requests.get(url, headers=headers, params=params)
@@ -24,7 +24,7 @@ def fetch_synonyms_antonyms(word, language="en"):
     url = f"https://wordsapiv1.p.rapidapi.com/words/{word}/synonyms"
     headers = {
         'x-rapidapi-host': "wordsapiv1.p.rapidapi.com",
-        'x-rapidapi-key': "e5422b2b2bmsh9d55d4e1d87c885p1c0822jsnd01b8895c9bc"
+        'x-rapidapi-key': "https://api.dictionaryapi.dev/api/v2/entries/en/"
     }
     params = {"language": language}
     synonyms_response = requests.get(url, headers=headers, params=params)
