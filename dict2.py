@@ -93,14 +93,18 @@ if word:
             st.write(", ".join(related_words))
 
         dest_lang = st.selectbox("Translate to language:", ["english", "french","Hindi","Telugu"])
+        cnt = 0
         translated_definitions = []
         for meaning in meanings:
             for definition in meaning['definitions']:
                 translated_definition = translate_text(definition, dest_lang)
                 translated_definitions.append(translated_definition)
         st.write(f"\nTranslated Definitions:")
-        for idx, trans_def in enumerate(translated_definitions, start=1,end=3):
+        for idx, trans_def in enumerate(translated_definitions, start=1):
+            cnt += 1
             st.write(f"Definition {idx}: {trans_def}") 
+            if cnt == 3:
+                break
 
     else:
         st.write("No data found for the given word.")
