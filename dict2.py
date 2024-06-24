@@ -88,7 +88,7 @@ if word:
             st.write("\nRelated Words:")
             st.write(", ".join(related_words))
 
-        dest_lang = st.selectbox("Translate to language:", ["es", "fr", "de", "zh-cn", "hi"])
+        dest_lang = st.selectbox("Translate to language:", ["english", "french","Hindi","Telugu"])
         translated_definitions = []
         for meaning in meanings:
             for definition in meaning['definitions']:
