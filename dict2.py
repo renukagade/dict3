@@ -32,11 +32,6 @@ def get_word_pronunciation(data):
         return data['phonetics'][0]['text']
     return "No pronunciation found."
 
-def get_word_origin(data):
-    if 'origin' in data:
-        return data['origin']
-    return "Origin not available."
-
 def get_related_words(data):
     related = []
     if 'meanings' in data:
@@ -76,12 +71,10 @@ if word:
     if word_data:
         meanings = get_word_meanings(word_data)
         pronunciation = get_word_pronunciation(word_data)
-        origin = get_word_origin(word_data)
         related_words = get_related_words(word_data)
 
         st.write(f"Word: {word}")
         st.write(f"Pronunciation: {pronunciation}")
-        st.write(f"Origin: {origin}")
 
         for idx, meaning in enumerate(meanings, start=1):
             st.write(f"\nMeaning {idx}:")
