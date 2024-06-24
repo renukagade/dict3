@@ -1,81 +1,80 @@
 import streamlit as st
 import requests
 
-# Function to fetch word details from WordsAPI
-def fetch_word_details(word, language="en"):
-    url = f"https://wordsapiv1.p.rapidapi.com/words/{word}"
-    headers = {
-        'x-rapidapi-host': "wordsapiv1.p.rapidapi.com",
-        'x-rapidapi-key': "https://api.dictionaryapi.dev/api/v2/entries/en/"
-    }
-    params = {"language": language}
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
-
-# Function to check grammar using LanguageTool API
-def check_grammar(text, language="en"):
-    url = "https://languagetool.org/api/v2/check"
-    params = {"text": text, "language": language}
-    response = requests.post(url, data=params)
-    return response.json()
-
-# Function to fetch synonyms and antonyms using WordsAPI
-def fetch_synonyms_antonyms(word, language="en"):
-    url = f"https://wordsapiv1.p.rapidapi.com/words/{word}/synonyms"
-    headers = {
-        'x-rapidapi-host': "wordsapiv1.p.rapidapi.com",
-        'x-rapidapi-key': "https://api.dictionaryapi.dev/api/v2/entries/en/"
-    }
-    params = {"language": language}
-    synonyms_response = requests.get(url, headers=headers, params=params)
-    synonyms = synonyms_response.json().get("synonyms", [])
-
-    url = f"https://wordsapiv1.p.rapidapi.com/words/{word}/antonyms"
-    antonyms_response = requests.get(url, headers=headers, params=params)
-    antonyms = antonyms_response.json().get("antonyms", [])
-
-    return synonyms, antonyms
-
-# Streamlit interface
-st.title("Dictionary Bot")
-word = st.text_input("Enter a word:")
-
-if st.button("Search"):
-    if word:
-        # Fetch word details
-        details = fetch_word_details(word)
-        if "success" in details and details["success"] is False:
-            st.error("Word not found. Please try another word.")
+# Function to fetch word details from API
+def fetch_word_details(word, language='en'):
+    api_key = 'your_api_key_here'
+    url = f'https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}'
+    headers = {'User-Agent': 'YourApp/1.0', 'Authorization': f'Token {api_key}'}
+    
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
         else:
-            st.subheader(f"Meaning of '{word}':")
-            st.write(details.get("results", {}).get("definition", "Not available"))
+            st.error(f"Error fetching data. Status code: {response.status_code}")
+            return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching data: {e}")
+        return None
 
-            st.subheader("Parts of Speech:")
-            st.write(details.get("results", {}).get("partOfSpeech", "Not available"))
+# Function to get meanings and examples
+def get_meanings_and_examples(details):
+    meanings_list = []
+    for entry in details:
+        for meaning in entry['meanings']:
+            meanings = []
+            for definition in meaning['definitions']:
+                meaning_text = f"**{definition['partOfSpeech']}**: {definition['definition']}"
+                if 'example' in definition:
+                    meaning_text += f"\n*Example*: {definition['example']}"
+                meanings.append(meaning_text)
+            meanings_list.append({
+                'word': entry['word'],
+                'meanings': meanings
+            })
+    return meanings_list
 
-            examples = details.get("results", {}).get("examples", [])
-            if examples:
-                st.subheader("Example Usage:")
-                for example in examples:
-                    st.write(f"- {example}")
+# Function to get word origin
+def get_word_origin(details):
+    origins = []
+    for entry in details:
+        if 'origin' in entry:
+            origins.append({
+                'word': entry['word'],
+                'origin': entry['origin']
+            })
+    return origins
 
-            st.subheader("Origin of the word:")
-            st.write(details.get("results", {}).get("origin", "Not available"))
+# Streamlit app
+def main():
+    st.title('Dictionary Bot')
+    word = st.text_input('Enter a word:')
+    language = st.selectbox('Select language:', ['English', 'French', 'Spanish'])
+    
+    if st.button('Lookup'):
+        if word:
+            if language == 'English':
+                details = fetch_word_details(word, 'en')
+                if details:
+                    meanings = get_meanings_and_examples(details)
+                    origins = get_word_origin(details)
+                    
+                    for meaning in meanings:
+                        st.header(f"Meaning ({meaning['word']})")
+                        for definition in meaning['meanings']:
+                            st.markdown(f"- {definition}")
+                        st.markdown("---")
+                    
+                    if origins:
+                        st.header(f"Origin of '{origins[0]['word']}'")
+                        st.markdown(origins[0]['origin'])
+                        st.markdown("---")
+                else:
+                    st.error(f"Word '{word}' not found in the dictionary.")
+            # Implement similar logic for other languages using respective APIs
+        else:
+            st.warning("Please enter a word to lookup.")
 
-            # Check grammar
-            st.subheader("Grammar Check:")
-            grammar_check = check_grammar(word)
-            if grammar_check.get("matches"):
-                for match in grammar_check["matches"]:
-                    st.write(f"Message: {match['message']}")
-                    st.write(f"Replacements: {match['replacements']}")
-
-            # Fetch synonyms and antonyms
-            synonyms, antonyms = fetch_synonyms_antonyms(word)
-            st.subheader("Synonyms:")
-            st.write(", ".join(synonyms) if synonyms else "Not available")
-
-            st.subheader("Antonyms:")
-            st.write(", ".join(antonyms) if antonyms else "Not available")
-    else:
-        st.warning("Please enter a word to search.")
+if __name__ == '__main__':
+    main()
