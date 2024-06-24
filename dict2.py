@@ -58,6 +58,22 @@ st.title("Enhanced Multilingual Dictionary Bot")
 st.write("Enter a word to get its meaning and more.")
 
 word = st.text_input("Enter a word:")
+language = st.selectbox('Select language:', ['English', 'French', 'Spanish'])
+    
+    if st.button('Lookup'):
+        if word:
+            if language == 'English':
+                details = fetch_word_details(word, 'en')
+                if details:
+                    meanings = get_meanings_and_examples(details)
+                    origins = get_word_origin(details)
+                    
+                    for meaning in meanings:
+                        st.header(f"Meaning ({meaning['word']})")
+                        for definition in meaning['meanings']:
+                            st.markdown(f"- {definition}")
+                        st.markdown("---")
+                    
 
 if word:
     word_data = get_word_data(word)
