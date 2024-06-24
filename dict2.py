@@ -1,79 +1,101 @@
 import streamlit as st
 import requests
+from googletrans import Translator
 
-# Function to fetch word details from API
-def fetch_word_details(word, language='en'):
-    
-    url = f'https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}'
-   
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
+BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/'
+
+def get_word_data(word):
+    url = f"{BASE_URL}{word}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if isinstance(data, list) and data:
+            return data[0]
         else:
-            st.error(f"Error fetching data. Status code: {response.status_code}")
             return None
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching data: {e}")
+    else:
         return None
 
-# Function to get meanings and examples
-def get_meanings_and_examples(details):
-    meanings_list = []
-    for entry in details:
-        for meaning in entry['meanings']:
-            meanings = []
+def get_word_meanings(data):
+    meanings = []
+    if 'meanings' in data:
+        for meaning in data['meanings']:
+            meanings.append({
+                'part_of_speech': meaning.get('partOfSpeech', 'Unknown'),
+                'definitions': [defn['definition'] for defn in meaning.get('definitions', [])],
+                'examples': [defn['example'] for defn in meaning.get('definitions', []) if 'example' in defn]
+            })
+    return meanings
+
+def get_word_pronunciation(data):
+    if 'phonetics' in data:
+        return data['phonetics'][0]['text']
+    return "No pronunciation found."
+
+def get_word_origin(data):
+    if 'origin' in data:
+        return data['origin']
+    return "Origin not available."
+
+def get_related_words(data):
+    related = []
+    if 'meanings' in data:
+        for meaning in data['meanings']:
+            for definition in meaning.get('definitions', []):
+                if 'derivativeOf' in definition:
+                    related.extend(definition['derivativeOf'])
+                if 'hasTypes' in definition:
+                    related.extend(definition['hasTypes'])
+    return related
+
+def translate_text(text, dest_lang):
+    translator = Translator()
+    translation = translator.translate(text, dest=dest_lang)
+    return translation.text
+
+# Streamlit UI
+st.title("Enhanced Multilingual Dictionary Bot")
+st.write("Enter a word to get its meaning and more.")
+
+word = st.text_input("Enter a word:")
+
+if word:
+    word_data = get_word_data(word)
+    if word_data:
+        meanings = get_word_meanings(word_data)
+        pronunciation = get_word_pronunciation(word_data)
+        origin = get_word_origin(word_data)
+        related_words = get_related_words(word_data)
+
+        st.write(f"Word: {word}")
+        st.write(f"Pronunciation: {pronunciation}")
+        st.write(f"Origin: {origin}")
+
+        for idx, meaning in enumerate(meanings, start=1):
+            st.write(f"\nMeaning {idx}:")
+            st.write(f"Part of Speech: {meaning['part_of_speech']}")
+            if meaning['definitions']:
+                st.write("Definitions:")
+                for definition in meaning['definitions']:
+                    st.write(f"- {definition}")
+            if meaning['examples']:
+                st.write("Examples:")
+                for example in meaning['examples']:
+                    st.write(f"- {example}")
+
+        if related_words:
+            st.write("\nRelated Words:")
+            st.write(", ".join(related_words))
+
+        dest_lang = st.selectbox("Translate to language:", ["es", "fr", "de", "zh-cn", "hi"])
+        translated_definitions = []
+        for meaning in meanings:
             for definition in meaning['definitions']:
-                meaning_text = f"**{definition['partOfSpeech']}**: {definition['definition']}"
-                if 'example' in definition:
-                    meaning_text += f"\n*Example*: {definition['example']}"
-                meanings.append(meaning_text)
-            meanings_list.append({
-                'word': entry['word'],
-                'meanings': meanings
-            })
-    return meanings_list
+                translated_definition = translate_text(definition, dest_lang)
+                translated_definitions.append(translated_definition)
+        st.write(f"\nTranslated Definitions:")
+        for idx, trans_def in enumerate(translated_definitions, start=1):
+            st.write(f"Definition {idx}: {trans_def}")
 
-# Function to get word origin
-def get_word_origin(details):
-    origins = []
-    for entry in details:
-        if 'origin' in entry:
-            origins.append({
-                'word': entry['word'],
-                'origin': entry['origin']
-            })
-    return origins
-
-# Streamlit app
-def main():
-    st.title('Dictionary Bot')
-    word = st.text_input('Enter a word:')
-    language = st.selectbox('Select language:', ['English', 'French', 'Spanish'])
-    
-    if st.button('Lookup'):
-        if word:
-            if language == 'English':
-                details = fetch_word_details(word, 'en')
-                if details:
-                    meanings = get_meanings_and_examples(details)
-                    origins = get_word_origin(details)
-                    
-                    for meaning in meanings:
-                        st.header(f"Meaning ({meaning['word']})")
-                        for definition in meaning['meanings']:
-                            st.markdown(f"- {definition}")
-                        st.markdown("---")
-                    
-                    if origins:
-                        st.header(f"Origin of '{origins[0]['word']}'")
-                        st.markdown(origins[0]['origin'])
-                        st.markdown("---")
-                else:
-                    st.error(f"Word '{word}' not found in the dictionary.")
-            # Implement similar logic for other languages using respective APIs
-        else:
-            st.warning("Please enter a word to lookup.")
-
-if __name__ == '__main__':
-    main()
+    else:
+        st.write("No data found for the given word.")
