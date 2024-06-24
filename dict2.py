@@ -3,7 +3,7 @@ import requests
 
 # Function to fetch word details from API
 def fetch_word_details(word, language='en'):
-    api_key = 'your_api_key_here'
+    
     url = f'https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}'
     headers = {'User-Agent': 'YourApp/1.0', 'Authorization': f'Token {api_key}'}
     
